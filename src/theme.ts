@@ -75,15 +75,7 @@ export function topbarHtml(active: "lookup" | "bulk"): string {
   return `
     <a class="skip" href="#main">Skip to content</a>
     <header class="topbar">
-      <a class="brand" href="./index.html" aria-label="Passkey Lookup home">
-        <img
-          class="brand-logo"
-          src="./new-frontier-security-logo.png"
-          width="1585"
-          height="423"
-          alt="New Frontier Security"
-        />
-      </a>
+      <a class="brand" href="./index.html">Passkey Lookup</a>
       <div class="header-actions">
         <nav class="desktop-nav" aria-label="Main navigation">${links}</nav>
         <button

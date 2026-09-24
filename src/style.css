@@ -8,7 +8,6 @@
   --hover: #29292f;
   --pink: #c5a0e8;
   --brand-gradient: linear-gradient(110deg, #a28cdd 0%, #c779c4 52%, #f07d91 100%);
-  --serif: Georgia, "Times New Roman", serif;
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --warning-bg: #251f22;
   --warning-text: #d2bac3;
@@ -111,20 +110,14 @@ summary:focus-visible {
 }
 
 .brand {
-  display: block;
-  width: 180px;
-  max-width: 48vw;
+  color: var(--ink);
+  font: 700 18px/1.2 var(--sans);
+  letter-spacing: -0.02em;
+  text-decoration: none;
 }
 
-.brand-logo {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-[data-theme="light"] .brand-logo {
-  filter: invert(1) hue-rotate(180deg);
-  mix-blend-mode: multiply;
+.brand:hover {
+  color: var(--pink);
 }
 
 .header-actions {
@@ -303,7 +296,7 @@ summary:focus-visible {
 }
 
 .page-intro h1 {
-  font-family: var(--serif);
+  font-family: var(--sans);
   font-size: clamp(42px, 6vw, 80px);
   line-height: 1.02;
   font-weight: 400;
@@ -710,8 +703,7 @@ section h2 {
   }
 
   .brand {
-    width: 160px;
-    max-width: 44vw;
+    font-size: 16px;
   }
 
   .desktop-nav {
