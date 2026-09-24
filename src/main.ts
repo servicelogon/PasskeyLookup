@@ -1,7 +1,7 @@
 import "./style.css";
 import { filterEntries, listEntries, lookupAaguid, normalizeAaguid, pickIcon } from "./lookup";
 import { PROVIDER_INFO } from "./providerInfo";
-import { applyStoredThemeOnLoad, initThemeToggle, isDarkActive } from "./theme";
+import { applyStoredThemeOnLoad, footerHtml, initChrome, isDarkActive, topbarHtml } from "./theme";
 import { loadMeta, loadRegistry } from "./registry";
 import type { AaguidEntry, AaguidMeta, AaguidRegistry } from "./types";
 import type { RegistryRow } from "./lookup";
@@ -75,59 +75,51 @@ function freshnessHtml(meta: AaguidMeta | null, entryCount: number): string {
 
 function renderShell(app: HTMLElement, entryCount: number, meta: AaguidMeta | null): void {
   app.innerHTML = `
-    <div class="layout">
-      <button
-        id="theme-toggle"
-        class="theme-toggle"
-        type="button"
-        aria-label="Toggle dark mode"
-      ></button>
+    <div class="shell">
+      ${topbarHtml("lookup")}
+      <main id="main" tabindex="-1">
+        <section class="page-intro">
+          <div class="kicker">02 / IDENTIFY <span>LOOKUP UTILITY</span></div>
+          <h1>Passkey<br /><em>AAGUID Lookup</em></h1>
+          <div class="intro-bottom">
+            <p>A long identifier, a quick answer. Match an AAGUID to its passkey provider, or browse the directory.</p>
+            ${freshnessHtml(meta, entryCount)}
+          </div>
+        </section>
 
-      <header>
-        <h1>Passkey AAGUID Lookup</h1>
-        <p class="subtitle">Match authenticator AAGUIDs to passkey providers and apps.</p>
-        ${freshnessHtml(meta, entryCount)}
-        <nav class="top-nav"><a href="./bulk.html">Bulk lookup →</a></nav>
-      </header>
+        <div class="workspace">
+          ${
+            entryCount === 0
+              ? `<div class="warning-banner">The AAGUID registry is empty. Run <code>npm run update-data</code> to refresh it.</div>`
+              : ""
+          }
 
-      ${
-        entryCount === 0
-          ? `<div class="warning-banner">The AAGUID registry is empty. Run <code>npm run update-data</code> to refresh it.</div>`
-          : ""
-      }
+          <div class="search-wrap">
+            <label class="search-label" for="aaguid-search">AAGUID</label>
+            <input
+              id="aaguid-search"
+              class="search-input"
+              type="text"
+              placeholder="ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4"
+              spellcheck="false"
+              autocomplete="off"
+            />
+          </div>
 
-      <div class="search-wrap">
-        <label class="search-label" for="aaguid-search">AAGUID</label>
-        <input
-          id="aaguid-search"
-          class="search-input"
-          type="text"
-          placeholder="ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4"
-          spellcheck="false"
-          autocomplete="off"
-        />
-      </div>
+          <section class="result-section" aria-live="polite">
+            <h2>Result</h2>
+            <div id="result-container">
+              <p class="result-empty">Enter an AAGUID above to look up its provider.</p>
+            </div>
+          </section>
 
-      <section class="result-section" aria-live="polite">
-        <h2>Result</h2>
-        <div id="result-container">
-          <p class="result-empty">Enter an AAGUID above to look up its provider.</p>
+          <section class="browse-section">
+            <h2>All providers (${entryCount})</h2>
+            <ul id="browse-list" class="browse-list"></ul>
+          </section>
         </div>
-      </section>
-
-      <section class="browse-section">
-        <h2>All providers (${entryCount})</h2>
-        <ul id="browse-list" class="browse-list"></ul>
-      </section>
-
-      <footer>
-        <p>
-          Data from the community
-          <a href="https://github.com/passkeydeveloper/passkey-authenticator-aaguids" target="_blank" rel="noopener noreferrer">passkey-authenticator-aaguids</a>
-          registry. For UI labeling only — not for security decisions.
-          See <a href="https://web.dev/articles/webauthn-aaguid" target="_blank" rel="noopener noreferrer">web.dev</a>.
-        </p>
-      </footer>
+      </main>
+      ${footerHtml()}
     </div>
   `;
 }
@@ -172,7 +164,7 @@ function mountApp(registry: AaguidRegistry, meta: AaguidMeta | null): void {
     searchInput.focus();
   }
 
-  initThemeToggle(themeToggle, render);
+  initChrome(themeToggle, render);
 
   searchInput.addEventListener("input", render);
 
@@ -225,11 +217,13 @@ async function main(): Promise<void> {
     mountApp(registry, meta);
   } catch (error) {
     app.innerHTML = `
-      <div class="layout">
-        <header><h1>Passkey AAGUID Lookup</h1></header>
-        <div class="warning-banner">
-          Failed to load AAGUID data: ${escapeHtml(error instanceof Error ? error.message : String(error))}
-        </div>
+      <div class="shell">
+        ${topbarHtml("lookup")}
+        <main id="main">
+          <div class="warning-banner">
+            Failed to load AAGUID data: ${escapeHtml(error instanceof Error ? error.message : String(error))}
+          </div>
+        </main>
       </div>
     `;
   }

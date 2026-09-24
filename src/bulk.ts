@@ -1,7 +1,7 @@
 import "./style.css";
 import { detectAaguidColumn, parseCsv, rowLooksLikeHeader, toCsv } from "./csv";
 import { resolveProviderName, normalizeAaguid } from "./lookup";
-import { applyStoredThemeOnLoad, initThemeToggle } from "./theme";
+import { applyStoredThemeOnLoad, footerHtml, initChrome, topbarHtml } from "./theme";
 import { loadRegistry } from "./registry";
 import type { AaguidRegistry } from "./types";
 
@@ -84,46 +84,47 @@ function downloadCsv(result: ResolvedCsv, downloadName: string): void {
 
 function renderShell(app: HTMLElement): void {
   app.innerHTML = `
-    <div class="layout">
-      <button
-        id="theme-toggle"
-        class="theme-toggle"
-        type="button"
-        aria-label="Toggle dark mode"
-      ></button>
+    <div class="shell">
+      ${topbarHtml("bulk")}
+      <main id="main" tabindex="-1">
+        <section class="page-intro">
+          <div class="kicker">THE TOOLBOX <span>BULK LOOKUP</span></div>
+          <h1>Serious security.<br /><em>Room to play.</em></h1>
+          <div class="intro-bottom">
+            <p>Upload a CSV or paste a list of AAGUIDs to get provider names back.</p>
+          </div>
+        </section>
 
-      <header>
-        <h1>Bulk AAGUID Lookup</h1>
-        <p class="subtitle">Upload a CSV or paste a list of AAGUIDs to get provider names back.</p>
-        <nav class="top-nav"><a href="./index.html">← Back to lookup</a></nav>
-      </header>
+        <div class="workspace">
+          <div class="bulk-privacy-note">
+            Your data is processed entirely in your browser. It is never uploaded, sent over the
+            network, or stored anywhere.
+          </div>
 
-      <div class="bulk-privacy-note">
-        Your data is processed entirely in your browser. It is never uploaded, sent over the
-        network, or stored anywhere.
-      </div>
+          <div class="bulk-upload">
+            <label class="search-label" for="csv-file">CSV file</label>
+            <input id="csv-file" type="file" accept=".csv,text/csv" />
+          </div>
 
-      <div class="bulk-upload">
-        <label class="search-label" for="csv-file">CSV file</label>
-        <input id="csv-file" type="file" accept=".csv,text/csv" />
-      </div>
+          <div class="bulk-divider">or</div>
 
-      <div class="bulk-divider">or</div>
+          <div class="bulk-paste-wrap">
+            <label class="search-label" for="paste-input">Paste AAGUIDs (one per line)</label>
+            <textarea
+              id="paste-input"
+              class="paste-input"
+              rows="6"
+              placeholder="ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4&#10;fa2b99dc-9e39-4257-8f92-4a30d23c4118"
+              spellcheck="false"
+            ></textarea>
+            <button id="resolve-paste" class="download-button" type="button">Resolve list</button>
+          </div>
 
-      <div class="bulk-paste-wrap">
-        <label class="search-label" for="paste-input">Paste AAGUIDs (one per line)</label>
-        <textarea
-          id="paste-input"
-          class="paste-input"
-          rows="6"
-          placeholder="ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4&#10;fa2b99dc-9e39-4257-8f92-4a30d23c4118"
-          spellcheck="false"
-        ></textarea>
-        <button id="resolve-paste" class="download-button" type="button">Resolve list</button>
-      </div>
-
-      <div id="bulk-status"></div>
-      <div id="bulk-result"></div>
+          <div id="bulk-status"></div>
+          <div id="bulk-result"></div>
+        </div>
+      </main>
+      ${footerHtml()}
     </div>
   `;
 }
@@ -141,7 +142,7 @@ function mountApp(registry: AaguidRegistry): void {
   const resultContainer = document.getElementById("bulk-result")!;
   const themeToggle = document.getElementById("theme-toggle") as HTMLButtonElement;
 
-  initThemeToggle(themeToggle, () => {});
+  initChrome(themeToggle, () => {});
 
   function runResolve(
     text: string,
@@ -207,11 +208,13 @@ async function main(): Promise<void> {
     mountApp(registry);
   } catch (error) {
     app.innerHTML = `
-      <div class="layout">
-        <header><h1>Bulk AAGUID Lookup</h1></header>
-        <div class="warning-banner">
-          Failed to load AAGUID data: ${escapeHtml(error instanceof Error ? error.message : String(error))}
-        </div>
+      <div class="shell">
+        ${topbarHtml("bulk")}
+        <main id="main">
+          <div class="warning-banner">
+            Failed to load AAGUID data: ${escapeHtml(error instanceof Error ? error.message : String(error))}
+          </div>
+        </main>
       </div>
     `;
   }
