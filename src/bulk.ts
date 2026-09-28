@@ -88,8 +88,8 @@ function renderShell(app: HTMLElement): void {
       ${topbarHtml("bulk")}
       <main id="main" tabindex="-1">
         <section class="page-intro">
-          <div class="kicker">THE TOOLBOX <span>BULK LOOKUP</span></div>
-          <h1>Serious security.<br /><em>Room to play.</em></h1>
+          <div class="kicker">THE TOOLBOX <span>BULK UPLOAD</span></div>
+          <h1>Bulk Upload</h1>
           <div class="intro-bottom">
             <p>Upload a CSV or paste a list of AAGUIDs to get provider names back.</p>
           </div>
