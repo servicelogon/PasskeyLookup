@@ -2,6 +2,8 @@
 // (CAP Evaluator, Entra Token Lab): logo, three links, a full-screen menu on
 // phones, the tool intro with its section tabs, and the wireframe footer mark.
 
+import { initFooterWire } from "./footerWire";
+
 export const SITE = "https://newfrontiersecurity.net";
 const SOURCE = "https://github.com/servicelogon/PasskeyLookup";
 
@@ -149,94 +151,6 @@ function initMenu(root: HTMLElement): void {
   });
   // Coming back through the back/forward cache must not show a stale open menu.
   window.addEventListener("pageshow", () => setOpen(false));
-}
-
-// A hairline icosahedron that turns slowly, ported from the NFS site. A still
-// frame when motion is reduced, and nothing at all where canvas is missing.
-function initFooterWire(canvas: HTMLCanvasElement | null): void {
-  const ctx = canvas?.getContext("2d");
-  if (!canvas || !ctx) return;
-
-  const phi = (1 + Math.sqrt(5)) / 2;
-  const verts = [
-    [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
-    [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
-    [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1],
-  ].map(([x, y, z]) => {
-    const l = Math.hypot(x, y, z);
-    return [x / l, y / l, z / l];
-  });
-  const edges = [
-    [0, 1], [0, 5], [0, 7], [0, 10], [0, 11], [1, 5], [1, 7], [1, 8], [1, 9], [2, 3],
-    [2, 4], [2, 6], [2, 10], [2, 11], [3, 4], [3, 6], [3, 8], [3, 9], [4, 5], [4, 9],
-    [4, 11], [5, 9], [5, 11], [6, 7], [6, 8], [6, 10], [7, 8], [7, 10], [8, 9], [10, 11],
-  ];
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const tilt = 0.62;
-  let frame = 0;
-  let running = false;
-
-  const size = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = canvas.clientWidth || 168;
-    canvas.width = Math.max(1, Math.round(w * dpr));
-    canvas.height = canvas.width;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
-  const project = ([x, y, z]: number[], yaw: number) => {
-    const x1 = x * Math.cos(yaw) + z * Math.sin(yaw);
-    const z1 = -x * Math.sin(yaw) + z * Math.cos(yaw);
-    return {
-      x: x1,
-      y: y * Math.cos(tilt) - z1 * Math.sin(tilt),
-      z: y * Math.sin(tilt) + z1 * Math.cos(tilt),
-    };
-  };
-  const draw = (yaw: number) => {
-    const w = canvas.clientWidth || 168;
-    const r = w * 0.36;
-    ctx.clearRect(0, 0, w, w);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = getComputedStyle(canvas).color;
-    const lines = edges
-      .map(([a, b]) => {
-        const s = project(verts[a], yaw);
-        const e = project(verts[b], yaw);
-        return { s, e, d: (s.z + e.z) / 2 };
-      })
-      .sort((p, q) => p.d - q.d);
-    for (const line of lines) {
-      ctx.globalAlpha = line.d < 0 ? 0.28 : 0.9;
-      ctx.beginPath();
-      ctx.moveTo(w / 2 + line.s.x * r, w / 2 - line.s.y * r);
-      ctx.lineTo(w / 2 + line.e.x * r, w / 2 - line.e.y * r);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-  };
-  const tick = (now: number) => {
-    draw(now * 0.00018);
-    frame = requestAnimationFrame(tick);
-  };
-  const start = () => {
-    if (running || reduce.matches) return;
-    running = true;
-    frame = requestAnimationFrame(tick);
-  };
-  const stop = () => {
-    running = false;
-    cancelAnimationFrame(frame);
-    draw(0.4);
-  };
-
-  size();
-  draw(0.4);
-  new ResizeObserver(() => {
-    size();
-    if (!running) draw(0.4);
-  }).observe(canvas);
-  new IntersectionObserver(([entry]) => (entry.isIntersecting ? start() : stop())).observe(canvas);
-  reduce.addEventListener("change", () => (reduce.matches ? stop() : start()));
 }
 
 export function escapeHtml(text: string): string {
